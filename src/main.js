@@ -1,7 +1,13 @@
 (function() {
+    var mousePos = {x: 0, y: 0};
+
     function init() {
-        canvas = jQuery('#gameBoard')[0];
+        var canvas = jQuery('#gameBoard')[0];
         var ctx = canvas.getContext('2d');
+        
+        canvas.addEventListener('mousemove', function(event) {
+            mousePos = {x: event.clientX - canvas.getBoundingClientRect().left, y: event.clientY - canvas.getBoundingClientRect().top};
+        });
 
         setInterval(function() {
             board.disks.forEach(function(disk) {
@@ -28,7 +34,14 @@
         ctx.fillStyle = 'grey';
         
         disk.triangles().forEach(function(triangle) {
-            drawTriangle(triangle, ctx)
+            if (triangleContains(triangle, mousePos)) {
+                var tempStyle = ctx.fillStyle;
+                ctx.fillStyle = 'blue';
+            }
+            drawTriangle(triangle, ctx);
+            if (triangleContains(triangle, mousePos)) {
+                ctx.fillStyle = tempStyle;
+            }
         });
     }
 
@@ -50,6 +63,28 @@
             return {x: x * Math.cos(radians) - y * Math.sin(radians) + centre.x,
                     y: x * Math.sin(radians) + y * Math.cos(radians) + centre.y};
         });
+    }
+
+    function triangleContains(triangle, point) {
+        for (var i = 0; i < triangle.length - 1; i++) {
+            var p1 = {x: triangle[i + 1].x - triangle[i].x, y: triangle[i + 1].y - triangle[i].y};
+            var p2 = {x: point.x - triangle[i].x, y: point.y - triangle[i].y};
+            if (crossProduct(p1, p2) < 0) {
+                return false;
+            }
+        }
+        
+        var p1 = {x: triangle[0].x - triangle[triangle.length - 1].x, y: triangle[0].y - triangle[triangle.length - 1].y};
+        var p2 = {x: point.x - triangle[triangle.length - 1].x, y: point.y - triangle[triangle.length - 1].y};
+        if (crossProduct(p1, p2) < 0) {
+            return false;
+        }
+
+        return true;
+    }
+
+    function crossProduct(p1, p2) {
+        return p1.x * p2.y - p2.x * p1.y;
     }
     
     board = {
@@ -83,8 +118,8 @@
         
             rotateAround([
                 {x: x - Math.sqrt(3) * radius / 4, y: y - radius / 4},
-                {x: x - Math.sqrt(3) * radius / 2, y: y + radius / 2},
-                {x: x, y: y + radius / 2}
+                {x: x, y: y + radius / 2},
+                {x: x - Math.sqrt(3) * radius / 2, y: y + radius / 2}
             ], {x: x, y: y}, this.rotation),
         
             rotateAround([
