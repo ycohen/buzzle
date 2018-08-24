@@ -20,23 +20,29 @@
 
         ctx.fillStyle = 'grey';
 
-        drawTriangle([
-            {x: x, y: y - disk.radius},
-            {x: x + Math.sqrt(3) * disk.radius / 4, y: y - disk.radius / 4},
-            {x: x - Math.sqrt(3) * disk.radius / 4, y: y - disk.radius / 4}
-        ], ctx);
+        drawTriangle(
+            rotateAround([
+                {x: x, y: y - disk.radius},
+                {x: x + Math.sqrt(3) * disk.radius / 4, y: y - disk.radius / 4},
+                {x: x - Math.sqrt(3) * disk.radius / 4, y: y - disk.radius / 4}
+            ], {x: x, y: y}, disk.rotation), ctx
+        );
         
-        drawTriangle([
-            {x: x - Math.sqrt(3) * disk.radius / 4, y: y - disk.radius / 4},
-            {x: x - Math.sqrt(3) * disk.radius / 2, y: y + disk.radius / 2},
-            {x: x, y: y + disk.radius / 2}
-        ], ctx);
+        drawTriangle(
+            rotateAround([
+                {x: x - Math.sqrt(3) * disk.radius / 4, y: y - disk.radius / 4},
+                {x: x - Math.sqrt(3) * disk.radius / 2, y: y + disk.radius / 2},
+                {x: x, y: y + disk.radius / 2}
+            ], {x: x, y: y}, disk.rotation), ctx
+        );
         
-        drawTriangle([
-            {x: x + Math.sqrt(3) * disk.radius / 4, y: y - disk.radius / 4},
-            {x: x + Math.sqrt(3) * disk.radius / 2, y: y + disk.radius / 2},
-            {x: x, y: y + disk.radius / 2}
-        ], ctx);
+        drawTriangle(
+            rotateAround([
+                {x: x + Math.sqrt(3) * disk.radius / 4, y: y - disk.radius / 4},
+                {x: x + Math.sqrt(3) * disk.radius / 2, y: y + disk.radius / 2},
+                {x: x, y: y + disk.radius / 2}
+            ], {x: x, y: y}, disk.rotation), ctx
+        );
     }
 
     function drawTriangle(vertices, ctx) {
@@ -48,6 +54,15 @@
         });
         ctx.fill();
         ctx.stroke();
+    }
+
+    function rotateAround(points, centre, radians) {
+        return points.map(function(point) {
+            var x = point.x - centre.x;
+            var y = point.y - centre.y;
+            return {x: x * Math.cos(radians) - y * Math.sin(radians) + centre.x,
+                    y: x * Math.sin(radians) + y * Math.cos(radians) + centre.y};
+        });
     }
     
     board = {
