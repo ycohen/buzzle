@@ -2,7 +2,14 @@
     function init() {
         canvas = jQuery('#gameBoard')[0];
         var ctx = canvas.getContext('2d');
-        board.disks.forEach(function(disk) { drawDisk(disk, ctx); });
+
+        setInterval(function() {
+            board.disks.forEach(function(disk) {
+                disk.rotation += Math.PI / 48;
+                disk.rotation %= (2 * Math.PI)
+                drawDisk(disk, ctx);
+            });
+        }, 20);
     }
     
     function drawDisk(disk, ctx) {
@@ -19,30 +26,10 @@
         ctx.fill();
 
         ctx.fillStyle = 'grey';
-
-        drawTriangle(
-            rotateAround([
-                {x: x, y: y - disk.radius},
-                {x: x + Math.sqrt(3) * disk.radius / 4, y: y - disk.radius / 4},
-                {x: x - Math.sqrt(3) * disk.radius / 4, y: y - disk.radius / 4}
-            ], {x: x, y: y}, disk.rotation), ctx
-        );
         
-        drawTriangle(
-            rotateAround([
-                {x: x - Math.sqrt(3) * disk.radius / 4, y: y - disk.radius / 4},
-                {x: x - Math.sqrt(3) * disk.radius / 2, y: y + disk.radius / 2},
-                {x: x, y: y + disk.radius / 2}
-            ], {x: x, y: y}, disk.rotation), ctx
-        );
-        
-        drawTriangle(
-            rotateAround([
-                {x: x + Math.sqrt(3) * disk.radius / 4, y: y - disk.radius / 4},
-                {x: x + Math.sqrt(3) * disk.radius / 2, y: y + disk.radius / 2},
-                {x: x, y: y + disk.radius / 2}
-            ], {x: x, y: y}, disk.rotation), ctx
-        );
+        disk.triangles().forEach(function(triangle) {
+            drawTriangle(triangle, ctx)
+        });
     }
 
     function drawTriangle(vertices, ctx) {
@@ -83,7 +70,46 @@
         this.triangleColours = ['grey', 'grey', 'grey'];
         this.row = row;
         this.col = col;
+        this.triangles = function () {
+            var x = this.x();
+            var y = this.y();
+            var radius = this.radius;
+            return [
+            rotateAround([
+                {x: x, y: y - radius},
+                {x: x + Math.sqrt(3) * radius / 4, y: y - radius / 4},
+                {x: x - Math.sqrt(3) * radius / 4, y: y - radius / 4}
+            ], {x: x, y: y}, this.rotation),
+        
+            rotateAround([
+                {x: x - Math.sqrt(3) * radius / 4, y: y - radius / 4},
+                {x: x - Math.sqrt(3) * radius / 2, y: y + radius / 2},
+                {x: x, y: y + radius / 2}
+            ], {x: x, y: y}, this.rotation),
+        
+            rotateAround([
+                {x: x + Math.sqrt(3) * radius / 4, y: y - radius / 4},
+                {x: x + Math.sqrt(3) * radius / 2, y: y + radius / 2},
+                {x: x, y: y + radius / 2}
+            ], {x: x, y: y}, this.rotation)
+            ];
+        }
+        this.x = function() {
+            if (this.row % 2 == 0) {
+                var x = 2 * this.radius * (this.col + 1);
+            } else {
+                var x = this.radius * (2 * this.col + 1);
+            }
+
+            return x;
+        }
+        this.y = function() {
+            var y = (this.row * Math.sqrt(3) + 1) * this.radius;
+    
+            return y;
+        }
     }
+
 
     window['init'] = init;
 })();
